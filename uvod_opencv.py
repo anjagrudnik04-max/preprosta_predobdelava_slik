@@ -5,7 +5,7 @@ UTILS = BASE / ".utils"
 import numpy as np
 
 def razrezi_sliko(slika: np.ndarray, sirina_ps: int, visina_ps: int):
-    
+
     podSlike = []
     visina = slika.shape[0]
     sirina = slika.shape[1]
@@ -18,6 +18,7 @@ def razrezi_sliko(slika: np.ndarray, sirina_ps: int, visina_ps: int):
 # manjši popravek za revizijo 
 
 def povecaj_za_faktor_2(slika: np.ndarray) -> np.ndarray:
+    
     visina, sirina = slika.shape[:2]
 
     if len(slika.shape) == 3:
