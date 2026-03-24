@@ -1,25 +1,19 @@
-from uvod_opencv import *
+import uvod_opencv
 import cv2 as cv
 import numpy as np
 
 slika = cv.imread("slika.jpg")
+
+if slika is None:
+    print("Slika ni najdena!")
+    exit()
+
 slika = slika.astype(np.float32) / 255
 
-print("Original dimenzije:", slika.shape)
-
-povecana = povecaj_za_faktor_2(slika)
-print("Povecana:", povecana.shape)
-
-zmanjsana = zmanjsaj_za_faktor_2(slika)
-print("Zmanjsana:", zmanjsana.shape)
-
-podslike = razrezi_sliko(slika, 100, 100)
-print("Stevilo podslik:", len(podslike))
-
-stevilo = prestej_piksle_z_barvo(slika, (0,0,0), (1,1,1))
-print("Piksli v območju:", stevilo)
-
-zrcaljena = zrcali_sliko_vertikalno(slika, "ZL")
-print("Zrcaljenje uspešno:", zrcaljena.shape)
+povecana = uvod_opencv.povecaj_za_faktor_2(slika)
+zmanjsana = uvod_opencv.zmanjsaj_za_faktor_2(slika)
+podslike = uvod_opencv.razrezi_sliko(slika, 100, 100)
+stevilo = uvod_opencv.prestej_piksle_z_barvo(slika, (0,0,0), (1,1,1))
+zrcaljena = uvod_opencv.zrcali_sliko_vertikalno(slika, "ZL")
 
 print("Vse funkcije delujejo brez crasha")
