@@ -1,1 +1,1 @@
-import test
+from preobdelava_slik import test
