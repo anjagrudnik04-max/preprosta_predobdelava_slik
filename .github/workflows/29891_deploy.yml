@@ -1,0 +1,42 @@
+# Ime workflowa, ki se prikaže v GitHub Actions
+name: Deploy workflow
+
+# Ta workflow se sproži, ko se zaključi drug workflow-> test workflow
+on:
+  workflow_run:
+    workflows: ["Test workflow"]  # ime mora biti enako kot v prvi skripti
+    types:
+      - completed  # sproži se ob zaključku -> negelede na uspeh
+
+jobs:
+  deploy:
+
+    # Ta pogoj zagotovi, da se deploy izvede SAMO,
+    # če je test workflow uspešno zaključen
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    # Job se izvaja na self-hosted runnerju 
+    runs-on: self-hosted
+
+    steps:
+
+      # Prenese (checkout) trenutno verzijo repozitorija na runner,
+      # da lahko delamo z datotekami-> npr. dockerfile, koda
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Prijava v DockerHub z uporabo skrivnih podatkov (secrets),
+      # ki so shranjeni v GitHub repozitoriju
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Zgradi Docker image na podlagi Dockerfile-a,
+      # ki se nahaja v repozitoriju
+      # -t določi ime in tag image-a (username/ime_repozitorija:tag)
+      - name: Build Docker image
+        run: docker build -t anja2125/preprosta_predobdelava_slik:latest .
+
+      # Pošlje (push) zgrajen Docker image na DockerHub repozitorij,
+      # da je aplikacija dostopna kot končni produkt
+      - name: Push Docker image
+        run: docker push anja2125/preprosta_predobdelava_slik:latest
