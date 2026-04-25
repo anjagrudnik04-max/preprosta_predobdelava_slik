@@ -22,14 +22,14 @@ jobs:
       # Preveri ali obstaja testna datoteka (test.py)
       # Če ne obstaja → zapiše napako v napaka.txt
       # Če obstaja → ustvari prazno datoteko napaka.txt      
-      - name: Check if tests exist
+      - name: Stop if error
+        shell: powershell
         run: |
-          if [ ! -f "test.py" ]; then
-            echo "Tests missing" > napaka.txt
-          else
-            echo "" > napaka.txt
-          fi
-      #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
+          if ((Get-Content napaka.txt).Length -gt 0) {
+            Write-Output "Error detected"
+            exit 1
+          }
+       #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
       # Shrani napaka.txt kot artefakt, da ga lahko uporabi naslednji job razlozi
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -54,7 +54,7 @@ jobs:
 
        # Prenese artefakt napaka.txt iz prvega joba
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: napaka
 
