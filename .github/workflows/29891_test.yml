@@ -1,18 +1,23 @@
 #ime workflowa
 name: Test workflow
+
 # Workflow se zažene ob vsakem pushu na branch master
 on:
   push:
     branches: [ master ]
+
 #definiranje job-sov
 jobs:
+
 #preverjanje testov
 #ime prvega joba
   check-tests:
   #workflow ne teče na git serverju ampak na mojem računalniku
     runs-on: self-hosted
+
     #zaporedje korakov, ki se izvaja zaporedno
     steps:
+
     #prenese mojo kodo iz gitHub repozitorija na računalnik, kjer se bo workflow izvajal
     #ime koraka
       - name: Checkout code
@@ -22,24 +27,29 @@ jobs:
       # Preveri ali obstaja testna datoteka (test.py)
       # Če ne obstaja → zapiše napako v napaka.txt
       # Če obstaja → ustvari prazno datoteko napaka.txt      
-      - name: Stop if error
+      - name: Check if tests exist
         shell: powershell
         run: |
-          if ((Get-Content napaka.txt).Length -gt 0) {
-            Write-Output "Error detected"
-            exit 1
+          if (Test-Path "test.py") {
+            New-Item -Path napaka.txt -ItemType File -Force
+          } else {
+            "Tests missing" | Set-Content napaka.txt
           }
-       #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
+
+      #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
       # Shrani napaka.txt kot artefakt, da ga lahko uporabi naslednji job razlozi
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: napaka
           path: napaka.txt
+
+
   #Poganjanje testov
   run-tests:
     runs-on: self-hosted
-     # Ta job se zažene šele, ko se prvi uspešno zaključi
+
+    # Ta job se zažene šele, ko se prvi uspešno zaključi
     needs: check-tests
 
     #Matrix lahko testira z več cerzijami pythona
@@ -48,36 +58,40 @@ jobs:
         python-version: [3.8, 3.10]
 
     steps:
+
       # Ponovno prenese kodo ( isto ko prej )
       - name: Checkout code
         uses: actions/checkout@v4
 
-       # Prenese artefakt napaka.txt iz prvega joba
+      # Prenese artefakt napaka.txt iz prvega joba
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: napaka
 
+      #ali ima datoteka vsaj nekaj vsebine (ni prazna)
+      #izpise napako
+      #ustavi job
       - name: Stop if error
-
-       #ali ima datoteka vsaj nekaj vsebine (ni prazna)
-       #izpise napako
-       #ustavi job
+        shell: powershell
         run: |
-          if [ -s napaka.txt ]; then 
-            echo "Error detected"
+          if ((Get-Content napaka.txt).Length -gt 0) {
+            Write-Output "Error detected"
             exit 1
-          fi
+          }
+
       #pripravi python okolje
       #uporabi verzijo matrix
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      #nemesti knjiznice
+
+      #namesti knjiznice
       #prebere dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       #zažene teste
       - name: Run tests
         run: python test.py
