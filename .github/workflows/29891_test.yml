@@ -12,15 +12,16 @@ jobs:
 #preverjanje testov
 #ime prvega joba
   check-tests:
+
   #workflow ne teče na git serverju ampak na mojem računalniku
-    runs-on: windows-latest
+    runs-on: self-hosted
+
     #zaporedje korakov, ki se izvaja zaporedno
     steps:
 
     #prenese mojo kodo iz gitHub repozitorija na računalnik, kjer se bo workflow izvajal
     #ime koraka
       - name: Checkout code
-      #tole je ze narejena git akcija ( prenese mojo kodo na runner )
         uses: actions/checkout@v4
 
       # Preveri ali obstaja testna datoteka (test.py)
@@ -29,14 +30,14 @@ jobs:
       - name: Check if tests exist
         shell: powershell
         run: |
-          if (Test-Path "test.py") {
-            New-Item -Path napaka.txt -ItemType File -Force
+          if (!(Test-Path "test.py")) {
+            "Tests missing" | Out-File napaka.txt
           } else {
-            "Tests missing" | Set-Content napaka.txt
+            "" | Out-File napaka.txt
           }
 
       #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
-      # Shrani napaka.txt kot artefakt, da ga lahko uporabi naslednji job razlozi
+      # Shrani napaka.txt kot artefakt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -46,19 +47,15 @@ jobs:
 
   #Poganjanje testov
   run-tests:
+
     runs-on: self-hosted
 
     # Ta job se zažene šele, ko se prvi uspešno zaključi
     needs: check-tests
 
-    #Matrix lahko testira z več cerzijami pythona
-    strategy:
-      matrix:
-        python-version: [3.8, 3.10]
-
     steps:
 
-      # Ponovno prenese kodo ( isto ko prej )
+      # Ponovno prenese kodo
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -68,9 +65,7 @@ jobs:
         with:
           name: napaka
 
-      #ali ima datoteka vsaj nekaj vsebine (ni prazna)
-      #izpise napako
-      #ustavi job
+      # Ustavi workflow če je napaka
       - name: Stop if error
         shell: powershell
         run: |
@@ -79,17 +74,14 @@ jobs:
             exit 1
           }
 
-      #pripravi python okolje
-      #uporabi verzijo matrix
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      #namesti knjiznice
-      #prebere dependencies
+      #setup-python -> izognem se permission errorjem
+      #namesti knjižnice (če obstaja requirements.txt)
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        shell: powershell
+        run: |
+          if (Test-Path "requirements.txt") {
+            pip install -r requirements.txt
+          }
 
       #zažene teste
       - name: Run tests
