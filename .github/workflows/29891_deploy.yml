@@ -23,7 +23,7 @@ jobs:
       # Prenese (checkout) trenutno verzijo repozitorija na runner,
       # da lahko delamo z datotekami-> npr. dockerfile, koda
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Prijava v DockerHub z uporabo skrivnih podatkov (secrets),
       # ki so shranjeni v GitHub repozitoriju
