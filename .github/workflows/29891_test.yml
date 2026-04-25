@@ -17,7 +17,7 @@ jobs:
     #ime koraka
       - name: Checkout code
       #tole je ze narejena git akcija ( prenese mojo kodo na runner )
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Preveri ali obstaja testna datoteka (test.py)
       # Če ne obstaja → zapiše napako v napaka.txt
