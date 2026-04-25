@@ -1,7 +1,5 @@
-# Ime workflowa
 name: Deploy workflow
 
-# Sproži se po test workflowu
 on:
   workflow_run:
     workflows: ["Test workflow"]
@@ -11,24 +9,19 @@ on:
 jobs:
   deploy:
 
-    # Zažene se samo če so testi uspešni
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: self-hosted
 
     steps:
-      # Prenos kode
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Prijava v DockerHub
       - name: Login to DockerHub    
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      # Build Docker image
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest .
 
-      # Push na DockerHub
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest
