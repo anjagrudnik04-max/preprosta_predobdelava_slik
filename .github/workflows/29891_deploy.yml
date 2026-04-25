@@ -1,31 +1,34 @@
-# Ime workflowa, ki se prikaže v GitHub Actions
+# Ime workflowa
 name: Deploy workflow
 
-# Ta workflow se sproži, ko se zaključi drug workflow-> test workflow
+# Sproži se po test workflowu
 on:
   workflow_run:
-    workflows: ["Test workflow"]  # ime mora biti enako kot v prvi skripti
+    workflows: ["Test workflow"]
     types:
-      - completed  # sproži se ob zaključku -> ne glede na uspeh
+      - completed
 
 jobs:
   deploy:
 
-    # Ta pogoj zagotovi, da se deploy izvede SAMO,
-    # če je test workflow uspešno zaključen
+    # Zažene se samo če so testi uspešni
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
-    # Job se izvaja na self-hosted runnerju 
     runs-on: self-hosted
 
     steps:
-
-      # Prenese (checkout) trenutno verzijo repozitorija na runner,
-      # da lahko delamo z datotekami -> npr. koda
+      # Prenos kode
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Simulacija deploya (za vajo)
-      # Ta korak samo izpiše sporočilo in se uspešno zaključi
-      - name: Deploy
-        run: echo "Deploy successful"
+      # Prijava v DockerHub
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest .
+
+      # Push na DockerHub
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest
