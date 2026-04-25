@@ -26,8 +26,8 @@ jobs:
 
       # Prijava v DockerHub z uporabo skrivnih podatkov (secrets),
       # ki so shranjeni v GitHub repozitoriju
-      - name: Deploy step
-        run: echo "Deploy successful!"
+      - name: Test Docker
+        run: docker ps
       # Zgradi Docker image na podlagi Dockerfile-a,
       # ki se nahaja v repozitoriju
       # -t določi ime in tag image-a (username/ime_repozitorija:tag)
