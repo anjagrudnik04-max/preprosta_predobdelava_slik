@@ -32,7 +32,7 @@ jobs:
       #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
       # Shrani napaka.txt kot artefakt, da ga lahko uporabi naslednji job razlozi
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: napaka
           path: napaka.txt
@@ -50,7 +50,7 @@ jobs:
     steps:
       # Ponovno prenese kodo ( isto ko prej )
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
        # Prenese artefakt napaka.txt iz prvega joba
       - name: Download artifact
