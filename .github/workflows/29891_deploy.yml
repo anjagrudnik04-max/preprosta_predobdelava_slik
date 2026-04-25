@@ -16,8 +16,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     # Job se izvaja na self-hosted runnerju 
-    runs-on: self-hosted
-
+    runs-on: windows-latest
     steps:
 
       # Prenese (checkout) trenutno verzijo repozitorija na runner,
