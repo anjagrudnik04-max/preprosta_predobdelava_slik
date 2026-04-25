@@ -13,8 +13,7 @@ jobs:
 #ime prvega joba
   check-tests:
   #workflow ne teče na git serverju ampak na mojem računalniku
-    runs-on: self-hosted
-
+    runs-on: windows-latest
     #zaporedje korakov, ki se izvaja zaporedno
     steps:
 
