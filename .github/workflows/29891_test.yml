@@ -1,4 +1,4 @@
-#ime workflowa
+# ime workflowa
 name: Test workflow
 
 # Workflow se zažene ob vsakem pushu na branch master
@@ -6,27 +6,16 @@ on:
   push:
     branches: [ master ]
 
-#definiranje job-sov
 jobs:
-
-#preverjanje testov
-#ime prvega joba
+  # Prvi job: preveri ali testne datoteke obstajajo
   check-tests:
-
-  #workflow ne teče na git serverju ampak na mojem računalniku
     runs-on: self-hosted
-
-    #zaporedje korakov, ki se izvaja zaporedno
     steps:
-
-    #prenese mojo kodo iz gitHub repozitorija na računalnik, kjer se bo workflow izvajal
-    #ime koraka
+      # Prenese kodo iz GitHub repozitorija
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Preveri ali obstaja testna datoteka (test.py)
-      # Če ne obstaja → zapiše napako v napaka.txt
-      # Če obstaja → ustvari prazno datoteko napaka.txt      
+      # Preveri ali obstaja test.py, rezultat zapiše v napaka.txt
       - name: Check if tests exist
         shell: powershell
         run: |
@@ -36,36 +25,33 @@ jobs:
             "" | Out-File napaka.txt
           }
 
-      #artefakt -> datoteka, ki jo en job shrani, da jo lahko drug job uporabi
-      # Shrani napaka.txt kot artefakt
+      # Shrani napaka.txt kot artefakt za naslednji job
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: napaka
           path: napaka.txt
 
-
-  #Poganjanje testov
+  # Drugi job: pripravi okolje in požene teste z matrix
   run-tests:
-
     runs-on: self-hosted
-
-    # Ta job se zažene šele, ko se prvi uspešno zaključi
     needs: check-tests
-
+    # Matrix - požene teste na več verzijah Pythona
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
-
-      # Ponovno prenese kodo
+      # Prenese kodo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Prenese artefakt napaka.txt iz prvega joba
+      # Prenese artefakt iz prvega joba
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: napaka
 
-      # Ustavi workflow če je napaka
+      # Ustavi workflow če napaka.txt ni prazna
       - name: Stop if error
         shell: powershell
         run: |
@@ -74,8 +60,13 @@ jobs:
             exit 1
           }
 
-      #setup-python -> izognem se permission errorjem
-      #namesti knjižnice (če obstaja requirements.txt)
+      # Nastavi Python verzijo iz matrix
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Namesti knjižnice iz requirements.txt
       - name: Install dependencies
         shell: powershell
         run: |
@@ -83,6 +74,6 @@ jobs:
             pip install -r requirements.txt
           }
 
-      #zažene teste
+      # Požene teste
       - name: Run tests
         run: python test.py
