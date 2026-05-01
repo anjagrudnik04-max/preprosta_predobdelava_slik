@@ -1,6 +1,7 @@
-#ime
+# ime workflowa
 name: Deploy workflow
 
+# Sproži se ko se Test workflow zaključi
 on:
   workflow_run:
     workflows: ["Test workflow"]
@@ -9,20 +10,39 @@ on:
 
 jobs:
   deploy:
-
+    # Zažene se samo če je Test workflow uspešno zaključen
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
     runs-on: self-hosted
-
     steps:
+      # Prenese kodo iz repozitorija
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to DockerHub    
+      # Prenese artefakt napaka.txt iz test workflowa
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: napaka
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      # Preveri da je napaka.txt prazna, sicer ustavi
+      - name: Check napaka.txt
+        shell: powershell
+        run: |
+          if ((Get-Content napaka.txt).Length -gt 0) {
+            Write-Output "Napaka.txt ni prazna - deploy se ustavi"
+            exit 1
+          }
+
+      # Prijava na DockerHub
+      - name: Login to DockerHub
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
+      # Zgradi Docker image
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest .
 
+      # Potisne Docker image na DockerHub
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest
