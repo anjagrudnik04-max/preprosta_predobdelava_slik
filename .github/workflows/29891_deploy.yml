@@ -32,7 +32,7 @@ jobs:
           }
       # Prijava na DockerHub
       - name: Login to DockerHub
-        run: echo "dckr_pat_lGeDBpB0zT4pzpgArxCmukX8kiw" | docker login -u "anja21docker" --password-stdin
+        run: echo "dckr_pat_Rmc8qis_bHLhX9UYFXXJBe5Eq24" | docker login -u "anja21docker" --password-stdin
       # Zgradi Docker image
       - name: Build Docker image
         run: docker build -t anja21docker/preprosta_predobdelava_slik:latest .
