@@ -1,5 +1,4 @@
 name: Deploy workflow
-#a
 on:
   workflow_run:
     workflows: ["Test workflow"]
