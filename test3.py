@@ -1,7 +1,7 @@
 import uvod_opencv
 import cv2 as cv
 import numpy as np
-
+#h
 slika = cv.imread("slika.jpg")
 
 if slika is None:
