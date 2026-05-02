@@ -34,7 +34,7 @@ jobs:
           }
 
       # Login DockerHub (FIXED!)
-      - name: Test login locally
+      - name: Debug docker login
         shell: powershell
         run: |
           docker logout
