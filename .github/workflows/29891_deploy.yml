@@ -34,11 +34,12 @@ jobs:
           }
 
       # Login DockerHub (FIXED!)
-      - name: Check secret length
+      - name: Test login locally
         shell: powershell
         run: |
-          $p = "${{ secrets.DOCKER_PASSWORD }}"
-          echo "Length: $($p.Length)"
+          docker logout
+          $pass = "${{ secrets.DOCKER_PASSWORD }}".Trim()
+          $pass | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       # Build Docker image
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/preprosta_predobdelava_slik:latest .
